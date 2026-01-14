@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Login Role</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef1f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .selection-container {
+            width: 400px;
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        .role-box {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .role-btn {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #333;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 8px;
+            transition: 0.3s;
+            cursor: pointer;
+            display: block;
+        }
+
+        .role-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="selection-container">
+        <h2>PLEASE SELECT YOUR ROLE</h2>
+        
+        <div class="role-box">
+            <a href="mangerlogin.html" class="role-btn">
+                <span class="icon">💼</span>
+                LOGIN AS MANAGER
+            </a>
+
+            <a href="employeelogin.html" class="role-btn">
+                <span class="icon">👤</span>
+                LOGIN AS EMPLOYEE
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
