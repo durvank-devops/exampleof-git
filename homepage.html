@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+
+    <style>
+        body { margin: 0; padding: 0; background: #f2f4f7; font-family: Arial, sans-serif; }
+
+        /* Centered Navbar */
+        .navbar {
+            width: 100%; background: #fff; padding: 10px 0; border-bottom: 2px solid #ddd;
+            display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo { position: absolute; left: 40px; display: flex; align-items: center; }
+        .logo img { height: 45px; width: auto; object-fit: contain; }
+
+        .nav-links { display: flex; align-items: center; gap: 40px; }
+        .nav-right { position: absolute; right: 40px; }
+        .navbar a { text-decoration: none; color: inherit; }
+
+        .nav-item { font-size: 15px; font-weight: bold; cursor: pointer; padding: 8px 14px; border-radius: 4px; transition: 0.2s; }
+        .active { border: 2px solid #333; }
+
+        .main-box { width: 92%; height: 350px; margin: 40px auto; background: #fff; border: 2px solid #ccc; border-radius: 10px; }
+
+        /* THE PROFILE BOX */
+        .profile-box {
+            width: 420px;
+            min-height: 130px;
+            margin: 40px auto;
+            background: #fff;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        /* Styling for the dynamic text within the box */
+        .profile-data {
+            padding: 20px;
+            width: 100%;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">
+            <img src="Screenshot 2025-12-17 202410.png" alt="Logo">
+        </div>
+
+        <div class="nav-links">
+            <a href="homepage.html"><div class="nav-item active">HOME</div></a>
+            <a href="dashboard.html"><div class="nav-item">DASHBOARD</div></a>
+            <a href="tasks.html"><div class="nav-item">TASKS</div></a>
+            <a href="employees.html" id="emp-tab"><div class="nav-item">EMPLOYEES</div></a>
+        </div>
+
+        <div class="nav-right">
+            <a href="index.html" style="text-decoration:none;"><div class="nav-item">LOGOUT</div></a>
+        </div>
+    </div>
+
+    <div class="main-box"></div>
+
+    <div class="profile-box" id="profile-box-container">
+        <div id="inner-content">YOUR PROFILE</div>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Employee Data
+    const info = {
+        "employee1": {
+            name: "John Doe",
+            id: "EMP-5052",
+            job: "Junior Android Developer",
+            dept: "Software Development",
+            email: "john.doe@company.com",
+            date: "January 15, 2024"
+        },
+        "manager": {
+            name: "Sarah Williams",
+            id: "MGR-1001",
+            job: "Project Manager",
+            dept: "Operations",
+            email: "sarah.w@company.com",
+            date: "June 10, 2020"
+        }
+    };
+
+    // 2. CHECK LOCALSTORAGE INSTEAD OF URL
+    const role = localStorage.getItem("userRole");
+    const container = document.getElementById('profile-box-container');
+    const content = document.getElementById('inner-content');
+
+    // 3. If a role is saved, show the info
+    if (role && info[role]) {
+        const user = info[role];
+        
+        container.style.display = "block";
+        container.style.height = "auto";
+        container.style.padding = "20px";
+        container.style.textAlign = "left";
+
+        content.innerHTML = `
+            <div style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #000;">${user.name}</div>
+            <div style="font-size: 15px; font-weight: normal; color: #555; line-height: 1.8;">
+                <b>Employee ID:</b> ${user.id}<br>
+                <b>Designation:</b> ${user.job}<br>
+                <b>Department:</b> ${user.dept}<br>
+                <b>Email:</b> ${user.email}<br>
+                <b>Joined:</b> ${user.date}
+            </div>
+        `;
+
+        // Hide Employees tab for employee1 on the homepage too
+        if (role === 'employee1') {
+            const empTab = document.getElementById('emp-tab');
+            if (empTab) empTab.style.display = "none";
+        }
+    } else {
+        // If no one is logged in, send them back to selection
+        window.location.href = "index.html";
+    }
+});
+
+// Logout function to clear memory
+function logout() {
+    localStorage.removeItem("userRole");
+    window.location.href = "index.html";
+    function logout() {
+    // 1. Completely clear the user's role and session data
+    localStorage.clear(); 
+    
+    // 2. Redirect the user back to the role selection page
+    window.location.href = "index.html"; 
+}
+}
+</script>
+<div class="nav-right">
+    <div class="nav-item" onclick="logout()" style="cursor:pointer">LOGOUT</div>
+</div>
+</body>
+</html>

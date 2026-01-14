@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks Page</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f2f4f7; }
+        .navbar {
+            width: 100%; background: #fff; padding: 10px 0; border-bottom: 2px solid #ddd;
+            display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { position: absolute; left: 40px; display: flex; align-items: center; }
+        .logo img { height: 45px; width: auto; object-fit: contain; }
+        .nav-links { list-style: none; display: flex; gap: 40px; padding: 0; margin: 0; font-weight: bold; }
+        .nav-links li a { text-decoration: none; color: black; padding: 8px 14px; display: inline-block; }
+        .nav-links .active a { border: 2px solid #333; border-radius: 4px; }
+        
+        .nav-right { position: absolute; right: 40px; }
+        .nav-item { font-size: 15px; font-weight: bold; cursor: pointer; padding: 8px 14px; border-radius: 4px; transition: 0.2s; }
+        .nav-item:hover { background: #ddd; }
+
+        .content { padding: 30px 40px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; }
+        h2 { margin: 0; font-size: 26px; letter-spacing: 1px; }
+        .add-btn { padding: 10px 18px; font-size: 14px; border: 2px solid #000; background: white; cursor: pointer; font-weight: bold; border-radius: 6px; }
+        
+        .tasks-container { 
+            margin-top: 20px; 
+            width: 100%; 
+            min-height: 500px; 
+            background: #fff; 
+            border-radius: 10px; 
+            border: 2px solid #ccc; 
+            padding: 20px; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px;
+            box-sizing: border-box;
+        }
+        .sub-title { font-weight: bold; margin-top: 25px; font-size: 18px; }
+
+        #successToast {
+            display:none; position: fixed; top: 20px; right: 20px; 
+            background: #28a745; color: white; padding: 15px 25px; 
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            z-index: 3000; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><img src="Screenshot 2025-12-17 202410.png" alt="Logo"></div>
+        <ul class="nav-links">
+            <li><a href="homepage.html">HOME</a></li>
+            <li><a href="dashboard.html">DASHBOARD</a></li>
+            <li class="active"><a href="tasks.html">TASKS</a></li>
+            <li id="emp-tab"><a href="employees.html">EMPLOYEES</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="nav-item" onclick="logout()">LOGOUT</div>
+        </div>
+    </nav>
+
+    <div id="successToast">✓ Task Saved & Assigned!</div>
+
+    <div class="content">
+        <div class="header-row">
+            <h2>TASKS</h2>
+            <button class="add-btn" id="add-task-btn" onclick="openModal()">ADD TASK +</button>
+        </div>
+        <div class="sub-title">ALL TASKS</div>
+        <div class="tasks-container" id="tasks-display-area"></div>
+    </div>
+
+    <div id="taskModal" style="display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
+        <div style="background: white; width: 400px; padding: 30px; border-radius: 12px; border: 2px solid #333; margin: 5% auto;">
+            <h3 style="margin-top: 0;">Create New Task</h3>
+            
+            <label style="display:block; font-weight:bold; margin-top:15px;">Task Title</label>
+            <input type="text" id="taskTitle" placeholder="e.g. Design UI" style="width:100%; padding:10px; margin-top:5px; border-radius:5px; border:1px solid #ccc; box-sizing:border-box;">
+            
+            <label style="display:block; font-weight:bold; margin-top:15px;">Assign To</label>
+            <select id="taskAssignee" style="width:100%; padding:10px; margin-top:5px; border-radius:5px; border:1px solid #ccc; box-sizing:border-box;">
+                <option value="">Select Employee</option>
+            </select>
+
+            <label style="display:block; font-weight:bold; margin-top:15px;">Due Date</label>
+            <input type="date" id="taskDueDate" style="width:100%; padding:10px; margin-top:5px; border-radius:5px; border:1px solid #ccc; box-sizing:border-box;">
+
+            <label style="display:block; font-weight:bold; margin-top:15px;">Priority</label>
+            <select id="taskPriority" style="width:100%; padding:10px; margin-top:5px; border-radius:5px; border:1px solid #ccc; box-sizing:border-box;">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+            </select>
+            
+            <div style="margin-top: 30px; display: flex; gap: 15px;">
+                <button onclick="saveNewTask()" style="flex:1; padding:12px; background:#333; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">SAVE TASK</button>
+                <button onclick="closeModal()" style="flex:1; padding:12px; background:#eee; color:#333; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const modal = document.getElementById('taskModal');
+    const displayArea = document.getElementById('tasks-display-area');
+
+    // 1. RUN THIS AS SOON AS THE PAGE LOADS
+    document.addEventListener("DOMContentLoaded", function() {
+        const role = localStorage.getItem("userRole");
+
+        // CRITICAL: Hide the Employee Page tab if the role is employee1
+        if (role === 'employee1') {
+            const empTab = document.getElementById('emp-tab');
+            const addBtn = document.getElementById('add-task-btn');
+            if (empTab) empTab.style.display = "none";
+            if (addBtn) addBtn.style.display = "none";
+        }
+        renderTasks(); // Load the tasks from the database
+    });
+
+    function openModal() { 
+        modal.style.display = "flex";
+        fetch('get_employees.php')
+        .then(res => res.json())
+        .then(data => {
+            const dropdown = document.getElementById('taskAssignee');
+            dropdown.innerHTML = '<option value="">Select Employee</option>';
+            data.forEach(emp => {
+                dropdown.innerHTML += `<option value="${emp.username}">${emp.username}</option>`;
+            });
+        });
+    }
+
+    function closeModal() { modal.style.display = "none"; }
+
+    function renderTasks() {
+        const role = localStorage.getItem("userRole"); 
+        fetch('get_tasks.php')
+        .then(res => res.json())
+        .then(tasks => {
+            displayArea.innerHTML = ""; 
+            tasks.forEach(task => {
+                let pColor = task.priority === 'High' ? '#ff4d4d' : (task.priority === 'Medium' ? '#ffa500' : '#28a745');
+                const isCompleted = task.status === 'Completed';
+                
+                displayArea.innerHTML += `
+                    <div class="task-card" style="background:white; border-left: 8px solid ${pColor}; border-radius:10px; padding:20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <div style="display:flex; justify-content:space-between;">
+                            <h4 style="margin:0;">${task.title}</h4>
+                            <span style="font-size:10px; font-weight:bold; background:${pColor}; color:white; padding:2px 6px; border-radius:4px;">${task.priority}</span>
+                        </div>
+                        <p style="color:#666; margin: 10px 0 5px 0; font-size:14px;">Assigned to: <b>${task.assignee}</b></p>
+                        <p style="font-size:13px; color:#333; margin-bottom:15px;">📅 Due: ${task.due_date}</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:10px;">
+                            <span style="font-weight:bold; color:${isCompleted ? 'green' : 'orange'}; font-size:13px;">
+                                ● ${task.status}
+                            </span>
+                            
+                            ${role === 'employee1' && !isCompleted ? 
+                                `<button onclick="updateStatus(${task.id}, 'Completed')" style="background:#28a745; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">Mark as Done</button>` 
+                                : ''}
+
+                            ${role === 'manager' ? 
+                                `<button onclick="removeTask(${task.id})" style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;">DELETE</button>` 
+                                : ''}
+                        </div>
+                    </div>`;
+            });
+        })
+        .catch(err => {
+            displayArea.innerHTML = "<p style='color:red;'>Error loading tasks. Ensure you are logged in.</p>";
+        });
+    }
+
+    function saveNewTask() {
+        const formData = new FormData();
+        formData.append('title', document.getElementById('taskTitle').value);
+        formData.append('assignee', document.getElementById('taskAssignee').value);
+        formData.append('due_date', document.getElementById('taskDueDate').value);
+        formData.append('priority', document.getElementById('taskPriority').value);
+
+        fetch('add_task.php', { method: 'POST', body: formData })
+        .then(res => res.text())
+        .then(data => {
+            if(data.trim() === "Success") {
+                closeModal();
+                renderTasks();
+                const toast = document.getElementById('successToast');
+                toast.style.display = "block";
+                setTimeout(() => toast.style.display = "none", 2000);
+            }
+        });
+    }
+
+    function updateStatus(taskId, newStatus) {
+        let formData = new FormData();
+        formData.append('task_id', taskId);
+        formData.append('status', newStatus);
+
+        fetch('update_task_status.php', { method: 'POST', body: formData })
+        .then(() => renderTasks())
+        .catch(err => console.error("Update failed:", err));
+    }
+
+    function removeTask(taskId) {
+        if (confirm("Delete this task?")) {
+            const fd = new FormData();
+            fd.append('task_id', taskId);
+            fetch('delete_task.php', { method: 'POST', body: fd })
+            .then(() => renderTasks());
+        }
+    }
+
+    function logout() { 
+        localStorage.clear(); 
+        window.location.href = "index.html"; 
+    }
+</script>
+</body>
+</html>

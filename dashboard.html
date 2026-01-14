@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f2f4f7; font-family: 'Segoe UI', Arial, sans-serif; color: #333; }
+        
+        /* Navbar Styling */
+        .navbar {
+            width: 100%; background: #fff; padding: 10px 0; border-bottom: 2px solid #ddd;
+            display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { position: absolute; left: 40px; display: flex; align-items: center; }
+        .logo img { height: 45px; width: auto; object-fit: contain; }
+        .nav-links { display: flex; align-items: center; gap: 40px; }
+        .nav-right { position: absolute; right: 40px; }
+        .navbar a { text-decoration: none; color: inherit; }
+        .nav-item { font-size: 15px; font-weight: bold; cursor: pointer; padding: 8px 14px; border-radius: 4px; transition: 0.2s; }
+        .nav-item:hover { background: #eee; }
+        .active { border: 2px solid #333; }
+
+        /* Dashboard Content */
+        .container { padding: 40px; max-width: 1200px; margin: auto; }
+        h2 { margin: 0 0 30px 0; font-size: 28px; letter-spacing: 1px; }
+
+        /* Professional Grid & Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+        .card { 
+            background: #fff; border: 1px solid #e0e0e0; padding: 30px; border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; transition: transform 0.2s; 
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card h3 { margin: 0; font-size: 14px; color: #777; letter-spacing: 1px; text-transform: uppercase; }
+        
+        /* Large Number Styling */
+        .stat-number { font-size: 42px; font-weight: 800; margin-top: 10px; }
+        #stat-total { color: #2196F3; }    /* Blue */
+        #stat-completed { color: #4CAF50; }/* Green */
+        #stat-pending { color: #FF9800; }  /* Orange */
+        #stat-members { color: #9C27B0; }  /* Purple */
+
+        /* Recent Tasks Box */
+        .recent-title { margin: 50px 0 15px 0; font-size: 20px; font-weight: bold; }
+        .recent-box { 
+            background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; 
+        }
+        .task-row { 
+            display: flex; justify-content: space-between; padding: 15px 25px; 
+            border-bottom: 1px solid #eee; transition: background 0.2s;
+        }
+        .task-row:last-child { border-bottom: none; }
+        .task-row:hover { background: #f9f9f9; }
+        .status-pill { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><img src="Screenshot 2025-12-17 202410.png" alt="Logo"></div>
+        <div class="nav-links">
+            <a href="homepage.html"><div class="nav-item">HOME</div></a>
+            <a href="dashboard.html"><div class="nav-item active">DASHBOARD</div></a>
+            <a href="tasks.html"><div class="nav-item">TASKS</div></a>
+            <a href="employees.html" id="emp-tab"><div class="nav-item">EMPLOYEES</div></a>
+        </div>
+        <div class="nav-right">
+            <div class="nav-item" onclick="logout()">LOGOUT</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>DASHBOARD</h2>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>Total Tasks</h3>
+                <div class="stat-number" id="stat-total">0</div>
+            </div>
+            <div class="card">
+                <h3>Completed</h3>
+                <div class="stat-number" id="stat-completed">0</div>
+            </div>
+            <div class="card">
+                <h3>In Progress</h3>
+                <div class="stat-number" id="stat-pending">0</div>
+            </div>
+            <div class="card" id="members-card">
+                <h3>Team Members</h3>
+                <div class="stat-number" id="stat-members">0</div>
+            </div>
+        </div>
+
+        <div class="recent-title">RECENT TASKS</div>
+        <div class="recent-box" id="recent-tasks-list">
+            <div style="padding: 20px; color: #999;">Loading recent activities...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const role = localStorage.getItem("userRole");
+
+            // 1. Role-based restrictions
+            if (role === 'employee1') {
+                const empTab = document.getElementById('emp-tab');
+                const membersCard = document.getElementById('members-card');
+                if (empTab) empTab.style.display = "none";
+                if (membersCard) membersCard.style.display = "none";
+            }
+
+            // 2. Fetch Dashboard Stats
+            fetch('get_dashboard_stats.php')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('stat-total').innerText = data.totalTasks || 0;
+                document.getElementById('stat-completed').innerText = data.completed || 0;
+                document.getElementById('stat-pending').innerText = data.pending || 0;
+                document.getElementById('stat-members').innerText = data.teamMembers || 0;
+            })
+            .catch(err => console.error("Stats Error:", err));
+
+            // 3. Fetch Recent Tasks (Last 5)
+            fetch('get_tasks.php')
+            .then(res => res.json())
+            .then(tasks => {
+                const list = document.getElementById('recent-tasks-list');
+                list.innerHTML = "";
+                // Show only the 5 most recent
+                tasks.slice(0, 5).forEach(task => {
+                    const statusColor = task.status === 'Completed' ? '#4CAF50' : '#FF9800';
+                    list.innerHTML += `
+                        <div class="task-row">
+                            <div>
+                                <div style="font-weight:bold;">${task.title}</div>
+                                <div style="font-size:12px; color:#888;">Assigned to: ${task.assignee}</div>
+                            </div>
+                            <span class="status-pill" style="background: ${statusColor}22; color: ${statusColor};">
+                                ${task.status}
+                            </span>
+                        </div>
+                    `;
+                });
+            });
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

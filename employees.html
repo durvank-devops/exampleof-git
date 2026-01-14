@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees Management</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f2f4f7; color: #333; }
+        
+        /* Navbar Styling */
+        .navbar {
+            width: 100%; background: #fff; padding: 10px 0; border-bottom: 2px solid #ddd;
+            display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { position: absolute; left: 40px; display: flex; align-items: center; }
+        .logo img { height: 45px; width: auto; object-fit: contain; }
+        .nav-links { list-style: none; display: flex; gap: 40px; padding: 0; margin: 0; font-weight: bold; }
+        .nav-links li a { text-decoration: none; color: black; padding: 8px 14px; display: inline-block; }
+        .nav-links li.active a { border: 2px solid #333; border-radius: 4px; }
+        .nav-right { position: absolute; right: 40px; }
+        .nav-item { font-size: 15px; font-weight: bold; cursor: pointer; padding: 8px 14px; border-radius: 4px; transition: 0.2s; }
+        .nav-item:hover { background: #ddd; }
+
+        /* Content Layout */
+        .content { padding: 40px; max-width: 1200px; margin: auto; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h2 { margin: 0; font-size: 26px; letter-spacing: 1px; }
+        .section-title { margin-bottom: 20px; font-weight: bold; font-size: 18px; color: #666; }
+
+        /* Employee Grid & Cards */
+        .employee-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; 
+        }
+        .emp-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .emp-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1); 
+        }
+        .emp-avatar {
+            width: 70px; height: 70px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: bold;
+        }
+        .emp-name { font-size: 20px; font-weight: bold; margin: 5px 0; }
+        .emp-role { color: #4f46e5; font-size: 14px; font-weight: 600; background: #eef2ff; padding: 4px 12px; border-radius: 20px; }
+        .emp-id { margin-top: 10px; font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><img src="Screenshot 2025-12-17 202410.png" alt="Logo"></div>
+        <ul class="nav-links">
+            <li><a href="homepage.html">HOME</a></li>
+            <li><a href="dashboard.html">DASHBOARD</a></li>
+            <li><a href="tasks.html">TASKS</a></li>
+            <li class="active"><a href="employees.html">EMPLOYEES</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="nav-item" onclick="logout()">LOGOUT</div>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="header-row">
+            <h2>EMPLOYEES</h2>
+        </div>
+        
+        <div class="section-title">TEAM MEMBERS</div>
+        
+        <div class="employee-grid" id="employee-display-area">
+            <p style="color: #999;">Loading team members...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Security Check: Only Managers allowed
+            const role = localStorage.getItem("userRole");
+            if (role !== 'manager') {
+                alert("Unauthorized Access. Redirecting to Home.");
+                window.location.href = "homepage.html";
+                return;
+            }
+
+            // 2. Initial Data Load
+            loadEmployees();
+        });
+
+        function loadEmployees() {
+            const displayArea = document.getElementById('employee-display-area');
+
+            // 3. Fetch data from your existing get_employees.php
+            fetch('get_employees.php')
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(data => {
+                displayArea.innerHTML = ""; // Clear loader
+                
+                if (data.length === 0) {
+                    displayArea.innerHTML = "<p>No team members found in database.</p>";
+                    return;
+                }
+
+                data.forEach(emp => {
+                    // Create card for each employee
+                    displayArea.innerHTML += `
+                        <div class="emp-card">
+                            <div class="emp-avatar">${emp.username.charAt(0).toUpperCase()}</div>
+                            <div class="emp-name">${emp.username}</div>
+                            <div class="emp-role">${emp.role}</div>
+                            <div class="emp-id">Employee ID: #${emp.id}</div>
+                        </div>
+                    `;
+                });
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                displayArea.innerHTML = "<p style='color:red;'>Failed to load employees. Check database connection.</p>";
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html"; 
+        }
+    </script>
+</body>
+</html>

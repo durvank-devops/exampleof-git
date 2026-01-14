@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef1f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 380px;
+            margin: 80px auto;
+            padding: 30px 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #4a4a4a;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 25px;
+            background: #333;
+            color: #fff;
+            border: none;
+            font-size: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #000;
+        }
+
+        .forgot {
+            margin-top: 18px;
+            font-size: 14px;
+        }
+
+        .forgot a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .forgot a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>EMPLOYEE LOGIN</h2>
+<form action="login_process.php" method="post">
+
+    <label>EMPLOYEE ID</label>
+    <input type="text" name="username" required placeholder="Enter Employee ID">
+
+    <label>PASSWORD</label>
+    <input type="password" name="password" required placeholder="Enter Password">
+
+    <button type="submit" class="btn">LOGIN</button>
+</form>
+
+
+        <div class="forgot">
+            <a href="#">FORGOT PASSWORD?</a>
+        </div>
+    </div>
+<script>
+    document.querySelector('form').onsubmit = function() {
+        // This saves the role in the browser's memory before the PHP runs
+        localStorage.setItem("userRole", "employee1");
+    };
+</script>
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        localStorage.setItem("userRole", "employee1"); //
+    });
+</script>
+</body>
+</html>
